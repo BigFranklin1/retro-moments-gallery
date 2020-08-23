@@ -5,22 +5,37 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<link type="text/css" rel="stylesheet" href="main.css">
+
 	</head>
 	<body>
 		<div id="blocker">
+			<!-- <p>Every block represents a tweet of an deceased account </p> -->
 
 			<div id="instructions">
-				<span style="font-size:36px">Click to play</span>
+
+				<span style="font-size:36px">Click to visit</span>
 				<br /><br />
 				Move: WASD<br/>
 				Jump: SPACE<br/>
 				Look: MOUSE
 			</div>
 
+		<canvas id="canvas"></canvas>
 		</div>
+
+
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<script src="https://unpkg.com/three"></script>
+		<script src="https://unpkg.com/@seregpie/three.text-texture"></script>
 		<script type="module">
 
+		// response.setHeader('Access-Control-Allow-Origin','http://localhost:4000');
+		jQuery.ajaxPrefilter(function(options) {
+		    if (options.crossDomain && jQuery.support.cors) {
+		        options.url = 'https://cors-anywhere.herokuapp.com/' + options.url;
+		    }
+		});
+// ******************************************************************************************************
 		var pic_urls;
 		console.log("s");
 		$.getJSON("test.json", function(json){
@@ -52,7 +67,7 @@
 
 			import { PointerLockControls } from '/PointerLockControls.js';
 
-			var camera, scene, renderer, controls;
+			var camera, scene, renderer, controls, texture;
 
 			var objects = [];
 
@@ -70,6 +85,8 @@
 			var vertex = new THREE.Vector3();
 			var color = new THREE.Color();
 
+			var canvas = document.getElementById('canvas'),
+			    ctx = canvas.getContext('2d');
 			init();
 			animate();
 
@@ -189,15 +206,15 @@
 				var position = floorGeometry.attributes.position;
 
 				// for ( var i = 0, l = position.count; i < l; i ++ ) {
-        //
+				//
 				// 	vertex.fromBufferAttribute( position, i );
-        //
-				// 	vertex.x += Math.random() * 20 - 10;
+				//
+				// 	vertex.x += Math.random() * 5 - 10;
 				// 	vertex.y += Math.random() * 2;
-				// 	vertex.z += Math.random() * 20 - 10;
-        //
+				// 	vertex.z += Math.random() * 5 - 10;
+				//
 				// 	position.setXYZ( i, vertex.x, vertex.y, vertex.z );
-        //
+				//
 				// }
 
 				floorGeometry = floorGeometry.toNonIndexed(); // ensure each face has unique vertices
@@ -207,7 +224,7 @@
 
 				for ( var i = 0, l = position.count; i < l; i ++ ) {
 
-					color.setHSL( Math.random() * 0.3 + 0.5, 0.85, Math.random() * 0.25 + 0.85 );
+					color.setHSL( Math.random() * 0.2 + 0.46, 0.25, Math.random() * 0.1 + 0.45 );
 					colors.push( color.r, color.g, color.b );
 
 				}
@@ -219,17 +236,33 @@
 				var floor = new THREE.Mesh( floorGeometry, floorMaterial );
 				scene.add( floor );
 
+			 // texture
+				// let texture = new THREE.TextTexture({
+				//   fillStyle: '#24ff00',
+				//   fontFamily: '"Times New Roman", Times, serif',
+				//   fontSize: 32,
+				//   fontStyle: 'italic',
+				//   text: [
+				//     'Twinkle, twinkle, little star,',
+				//     'How I wonder what you are!',
+				//     'Up above the world so high,',
+				//     'Like a diamond in the sky.',
+				//   ].join('\n'),
+				// });
 				// Boxes
 				var boxGeometry = new THREE.BoxBufferGeometry( 20, 20, 20 );
 				boxGeometry = boxGeometry.toNonIndexed(); // ensure each face has unique vertices
 				// ************************************************************************
+				texture = new THREE.Texture(canvas);
+
 				const loadManager = new THREE.LoadingManager();
 				const loader = new THREE.TextureLoader();
 				const materials = [
-					new THREE.MeshBasicMaterial({map: loader.load('http://ww1.sinaimg.cn/large/63885668ly1ghhg0kjbe7j23dw52u4qr.jpg')}),
-					new THREE.MeshBasicMaterial({map: loader.load('http://ww1.sinaimg.cn/large/63885668ly1ghhg0nx4a7j23gg56ou0y.jpg')}),
-					new THREE.MeshBasicMaterial({map: loader.load('https://threejsfundamentals.org/threejs/resources/images/flower-3.jpg')}),
-					new THREE.MeshBasicMaterial({map: loader.load('https://threejsfundamentals.org/threejs/resources/images/flower-4.jpg')}),
+					new THREE.MeshBasicMaterial({map: loader.load('img/20180101 _FCkPEfDDz_2.jpg')}),
+					new THREE.MeshBasicMaterial({map: texture}),
+					// the curtail
+					new THREE.MeshBasicMaterial({map: texture}),
+					new THREE.MeshBasicMaterial({map: loader.load('img/20180101 _FCkPEfDDz_1.jpg')}),
 					new THREE.MeshBasicMaterial({map: loader.load('https://threejsfundamentals.org/threejs/resources/images/flower-5.jpg')}),
 					new THREE.MeshBasicMaterial({map: loader.load('https://threejsfundamentals.org/threejs/resources/images/flower-6.jpg')}),
 				];
@@ -239,7 +272,7 @@
 
 				for ( var i = 0, l = position.count; i < l; i ++ ) {
 
-					color.setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+					// color.setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
 					colors.push( color.r, color.g, color.b );
 
 				}
@@ -249,19 +282,20 @@
 				for ( var i = 0; i < 10; i ++ ) {
 
 					var boxMaterial = new THREE.MeshPhongMaterial( { specular: 0xffffff, flatShading: true, vertexColors: true } );
-					boxMaterial.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+					boxMaterial.color.setHSL( Math.random() * 0.5 + 0.2, 0.35, Math.random() * 0.45 + 0.25 );
 
 					var box = new THREE.Mesh(boxGeometry, materials);
 
 					// var box = new THREE.Mesh( boxGeometry, boxMaterial );
 					box.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
-					box.position.y = Math.floor( Math.random() * 20 ) * 20 + 10;
+					box.position.y = Math.floor( Math.random() * 20 ) * 4 + 10;
 					box.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
 
 					scene.add( box );
 					objects.push( box );
 
 				}
+				// canvas.width = canvas.height = 0;
 
 				//
 
@@ -288,6 +322,8 @@
 			function animate() {
 
 				requestAnimationFrame( animate );
+				changeCanvas();
+				texture.needsUpdate = true;
 
 				if ( controls.isLocked === true ) {
 
@@ -340,6 +376,19 @@
 
 				renderer.render( scene, camera );
 
+			}
+
+			function changeCanvas() {
+			    ctx.font = '20pt Arial';
+			    ctx.fillStyle = 'red';
+			    ctx.fillRect(0, 0, canvas.width, canvas.height);
+			    ctx.fillStyle = 'white';
+			    ctx.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
+			    ctx.fillStyle = 'black';
+			    ctx.textAlign = "center";
+			    ctx.textBaseline = "middle";
+			    // ctx.fillText(new Date().getTime(), canvas.width / 2, canvas.height / 2);
+			    ctx.fillText("中文", canvas.width / 2, canvas.height / 2);
 			}
 
 		</script>

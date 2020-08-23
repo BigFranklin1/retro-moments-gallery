@@ -21,10 +21,22 @@ button {
 	cursor: pointer;
 	text-transform: uppercase;
 }
-
 canvas {
 	display: block;
 }
+#canvas {
+	/* display:block; */
+	padding: 0;
+	margin: 0;
+	width: 0;
+	height: 0;
+}
+
+/* #c {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+} */
 
 #info {
 	position: absolute;

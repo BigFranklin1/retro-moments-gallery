@@ -2,7 +2,7 @@ import {
 	Euler,
 	EventDispatcher,
 	Vector3
-} from "./three.module.js";
+} from "https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js";
 
 var PointerLockControls = function ( camera, domElement ) {
 
