@@ -35,32 +35,35 @@
 		        options.url = 'https://cors-anywhere.herokuapp.com/' + options.url;
 		    }
 		});
-// ******************************************************************************************************
+// ******************************************JSON Logic************************************************************
 		var pic_urls;
-		console.log("s");
+		// const content;
+		let text_array = [];
 		$.getJSON("test.json", function(json){
-			// for(var i in json.weibo)
-			// {
-			// 	console.log(i);
-			// }
-			console.log("ss");
 			$.each(json.weibo,function(index,value){
-				if (value.id == "JeHIXsu6K") {
-					console.log(value);
-					console.log(value.original_pictures);
-					// value.original_pictures
-					// console.log(typeof value.original_pictures);
-					pic_urls = value.original_pictures.split(",");
-
-					pic_urls.forEach((pic_url, i) => {
-						console.log(pic_url);
-					});
+				if (value.publish_time == "2020-08-06 22:07") {
+					let content = value.content;
+					var incre = 10;
+					for (var i = 0; i < value.content.length; i+=incre){
+						let sub = content.substring(i,i+incre);
+						text_array.push(sub);
+					}
+					// pic_urls = value.original_pictures.split(",");
+					// pic_urls.forEach((pic_url, i) => {
+					// 	// console.log(pic_url);
+					// });
 				}
 			})
+			console.log(text_array); // output is desired:["#LV春夏21男装秀", "# @路易威登  玩", "的很开心的一天～ 路", "易威登的微博直播 [", "组图共6张]原图"]
 		});
+		console.log(text_array); // output is []
 
 
-//****************************************************
+// console.log(test);
+	// read(()=>console.log(t));
+		// console.log(t);
+
+//***********************************************ThreeJS*****************************************************************
 
 			// import * as THREE from './three.module.js';
 			import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
@@ -295,6 +298,9 @@
 					objects.push( box );
 
 				}
+
+				changeCanvas();
+
 				// canvas.width = canvas.height = 0;
 
 				//
@@ -303,8 +309,6 @@
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				document.body.appendChild( renderer.domElement );
-
-				//
 
 				window.addEventListener( 'resize', onWindowResize, false );
 
@@ -322,7 +326,7 @@
 			function animate() {
 
 				requestAnimationFrame( animate );
-				changeCanvas();
+				// changeCanvas();
 				texture.needsUpdate = true;
 
 				if ( controls.isLocked === true ) {
@@ -379,16 +383,23 @@
 			}
 
 			function changeCanvas() {
-			    ctx.font = '20pt Arial';
+			    ctx.font = '18pt Arial';
 			    ctx.fillStyle = 'red';
 			    ctx.fillRect(0, 0, canvas.width, canvas.height);
 			    ctx.fillStyle = 'white';
 			    ctx.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
 			    ctx.fillStyle = 'black';
-			    ctx.textAlign = "center";
-			    ctx.textBaseline = "middle";
+			    ctx.textAlign = "left";
+			    ctx.textBaseline = "ideographic";
 			    // ctx.fillText(new Date().getTime(), canvas.width / 2, canvas.height / 2);
-			    ctx.fillText("中文", canvas.width / 2, canvas.height / 2);
+					// console.log(typeof content);
+					let text=["#LV春夏21男装秀", "# @路易威登  玩", "的很开心的一天～ 路", "易威登的微博直播 [", "组图共6张]原图"];
+					// var text = content.split(" ", 3);
+					// console.log(typeof content);
+					// console.log(text.width);
+					ctx.fillText(text[0], 10, 40);
+					ctx.fillText(text[1], 10, 60);
+					ctx.fillText(text[2], 10, 80);
 			}
 
 		</script>
