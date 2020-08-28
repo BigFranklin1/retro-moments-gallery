@@ -235,7 +235,7 @@ function render(){
     const loader = new THREE.TextureLoader();
     var img = new Image();
     img.crossOrigin = "anonymous";
-    img.src="http://ww1.sinaimg.cn/large/63885668ly1ghhg0kjbe7j23dw52u4qr.jpg"
+    img.src="https://ww1.sinaimg.cn/large/63885668ly1ghhg0kjbe7j23dw52u4qr.jpg"
     const materials = [
       new THREE.MeshBasicMaterial({map: loader.load('img/20180101 _FCkPEfDDz_2.jpg')}),
       new THREE.MeshBasicMaterial({map: texture}),
