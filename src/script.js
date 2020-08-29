@@ -12,7 +12,7 @@ read();
 function read(){
   $.getJSON("test.json", function(json){
     $.each(json.weibo,function(index,value){
-      if (value.publish_time == "2020-08-06 22:07") {
+      if (value.publish_time == "2020-03-07 06:14") {
         let content = value.content;
         var incre = 10;
         for (var i = 0; i < value.content.length; i+=incre){
@@ -250,7 +250,6 @@ function render(){
     colors = [];
 
     for ( var i = 0, l = position.count; i < l; i ++ ) {
-
       // color.setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
       colors.push( color.r, color.g, color.b );
 
@@ -270,11 +269,12 @@ function render(){
       box.position.y = Math.floor( Math.random() * 20 ) * 4 + 10;
       box.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
 
+      box.rotation.y = Math.random()*20;
+
       scene.add( box );
       objects.push( box );
 
     }
-
     changeCanvas();
 
     // canvas.width = canvas.height = 0;
@@ -301,12 +301,19 @@ function render(){
 
   function animate() {
 
+    // objects.position.x += 1;
     requestAnimationFrame( animate );
     // changeCanvas();
     texture.needsUpdate = true;
 
     if ( controls.isLocked === true ) {
+      // animate boxes
+      objects.forEach((obj, i) => {
+        obj.position.x+=0.1;
+        obj.position.z+=0.1;
+      });
 
+      //
       raycaster.ray.origin.copy( controls.getObject().position );
       raycaster.ray.origin.y -= 10;
 
@@ -317,8 +324,8 @@ function render(){
       var time = performance.now();
       var delta = ( time - prevTime ) / 1000;
 
-      velocity.x -= velocity.x * 10.0 * delta;
-      velocity.z -= velocity.z * 10.0 * delta;
+      velocity.x -= velocity.x * 5.0 * delta;
+      velocity.z -= velocity.z * 5.0 * delta;
 
       velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
