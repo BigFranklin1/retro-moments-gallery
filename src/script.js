@@ -1,39 +1,79 @@
-// response.setHeader('Access-Control-Allow-Origin','http://localhost:4000');
-jQuery.ajaxPrefilter(function(options) {
-    if (options.crossDomain && jQuery.support.cors) {
-        options.url = 'https://cors-anywhere.herokuapp.com/' + options.url;
-    }
-});
 // ******************************************JSON Logic************************************************************
-let pic_urls;
-// const content;
+let pic_urls, pic_dir;
 let text_array = [];
+let content = [];
+let pic_dirs = [];
+let publish_time = [];
+let num = 0;
+let today = new Date().getMonth()+1+"-"+new Date().getDate();
+console.log(today);
 read();
-function read(){
+async function read(){
   $.getJSON("test.json", function(json){
-    $.each(json.weibo,function(index,value){
-      if (value.publish_time == "2020-03-07 06:14") {
-        let content = value.content;
-        var incre = 10;
-        for (var i = 0; i < value.content.length; i+=incre){
-          let sub = content.substring(i,i+incre);
-          text_array.push(sub);
+    // v
+    $.each(json.users, function(i,vv){
+      console.log(vv.user.nickname);
+      $.each(vv.weibo,function(index,value){
+        // console.log(parseInt(value.publish_time.substring(5,6)));
+        // (5,7) refers to the month, month starts from 0
+        // value
+        if (parseInt(value.publish_time.substring(5,7),10) == new Date().getMonth()+1) {
+
+          content.push(value.content);
+
+          pic_urls = value.original_pictures.split(",");
+          pic_dirs = [];
+
+          publish_time.push(value.publish_time);
+          if(pic_urls.length > 1){
+            for(var i = 0; i < pic_urls.length; i++){
+              pic_dir = "/weibo/" + vv.user.id+"/img/"
+              + value.publish_time.substring(0,4)
+              + value.publish_time.substring(5,7)
+              + value.publish_time.substring(8,10)
+              + " _" + value.id + "_"+ (i+1) + ".jpg";
+
+              pic_dir.replace(/%20/g, " ");
+              pic_dirs.push(pic_dir);
+              console.log(pic_dir);
+            }
+          }else {
+            pic_dir = "/weibo/" + vv.user.id+"/img/"
+            + value.publish_time.substring(0,4)
+            + value.publish_time.substring(5,7)
+            + value.publish_time.substring(8,10)
+            + " _" + value.id + ".jpg";
+
+            pic_dir.replace(/%20/g, " ");
+            pic_dirs.push(pic_dir);
+          }
+
+          num++;
         }
-        pic_urls = value.original_pictures.split(",");
-        pic_urls.forEach((pic_url, i) => {
-        	// console.log(pic_url);
-        });
-      }
+      });
+
     });
     // console.log(text_array);
-    render();
-     // output is desired:["#LV春夏21男装秀", "# @路易威登  玩", "的很开心的一天～ 路", "易威登的微博直播 [", "组图共6张]原图"]
+
+    // change lines
+    var incre = 12;
+    let line = [];
+
+    for (var i = 0; i < content.length; i++){
+      line = [];
+
+      for (var j = 0; j < content[i].length; j+=incre){
+        line.push(content[i].substring(j,j+incre));
+        // console.log(text_array);
+      }
+      text_array.push(line);
+
+    }
+    // tweet.push(text_array);
+    init();
   });
 }
-function render(){
-  console.log(text_array);
-  console.log(pic_urls);
-}
+
 
 
 //***********************************************ThreeJS*****************************************************************
@@ -43,10 +83,12 @@ function render(){
 
   import { PointerLockControls } from '/PointerLockControls.js';
 
-  var camera, scene, renderer, controls, texture;
-
+  var camera, scene, renderer, controls, texture_content, texture_date;
+  var canvas, canvas_date;
+  var materials = [];
   var objects = [];
-
+  var textures = [];
+  var textures_date = [];
   var raycaster;
 
   var moveForward = false;
@@ -61,13 +103,14 @@ function render(){
   var vertex = new THREE.Vector3();
   var color = new THREE.Color();
 
-  var canvas = document.getElementById('canvas'),
-      ctx = canvas.getContext('2d');
-  init();
-  animate();
 
   function init() {
 
+
+    console.log(num);
+    console.log(publish_time);
+    // console.log(pic_dirs);
+    // console.log(content);
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
     camera.position.y = 10;
 
@@ -212,58 +255,96 @@ function render(){
     var floor = new THREE.Mesh( floorGeometry, floorMaterial );
     scene.add( floor );
 
-   // texture
-    // let texture = new THREE.TextTexture({
-    //   fillStyle: '#24ff00',
-    //   fontFamily: '"Times New Roman", Times, serif',
-    //   fontSize: 32,
-    //   fontStyle: 'italic',
-    //   text: [
-    //     'Twinkle, twinkle, little star,',
-    //     'How I wonder what you are!',
-    //     'Up above the world so high,',
-    //     'Like a diamond in the sky.',
-    //   ].join('\n'),
-    // });
-    // Boxes
-    var boxGeometry = new THREE.BoxBufferGeometry( 20, 20, 20 );
-    boxGeometry = boxGeometry.toNonIndexed(); // ensure each face has unique vertices
     // ************************************************************************
-    texture = new THREE.Texture(canvas);
-
+    // position = boxGeometry.attributes.position;
+    // colors = [];
+    //
+    // for ( var i = 0, l = position.count; i < l; i ++ ) {
+    //   // color.setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+    //   colors.push( color.r, color.g, color.b );
+    //
+    // }
     const loadManager = new THREE.LoadingManager();
     const loader = new THREE.TextureLoader();
-    var img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src="https://ww1.sinaimg.cn/large/63885668ly1ghhg0kjbe7j23dw52u4qr.jpg"
-    const materials = [
-      new THREE.MeshBasicMaterial({map: loader.load('img/20180101 _FCkPEfDDz_2.jpg')}),
-      new THREE.MeshBasicMaterial({map: texture}),
-      // the curtail
-      new THREE.MeshBasicMaterial({map: texture}),
-      new THREE.MeshBasicMaterial({map: loader.load('img/20180101 _FCkPEfDDz_1.jpg')}),
-      new THREE.MeshBasicMaterial({map: loader.load(img)}),
-      new THREE.MeshBasicMaterial({map: loader.load('https://threejsfundamentals.org/threejs/resources/images/flower-6.jpg')}),
-    ];
-    // ************************************************************************
-    position = boxGeometry.attributes.position;
-    colors = [];
+    // renderer
+    renderer = new THREE.WebGLRenderer( { antialias: true } );
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    document.body.appendChild( renderer.domElement );
 
-    for ( var i = 0, l = position.count; i < l; i ++ ) {
-      // color.setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
-      colors.push( color.r, color.g, color.b );
+    console.log(pic_dirs[0]);
+    for (var i = 0; i < num; i++) {
+      canvas = document.createElement('canvas');
+      canvas.id = "canvas_content" + i.toString();
+      canvas.width = "300";
+      canvas.height = "300";
 
-    }
+      canvas_date = document.createElement('canvas');
+      canvas_date.id = "canvas_date" + i.toString();
+      canvas_date.width = "300";
+      canvas_date.height = "300";
+      // canvas.style.display="none";
+      blocker.appendChild(canvas);
+      blocker.appendChild(canvas_date);
 
-    boxGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+      // set content canvas
+      var ctx_content = document.getElementById("canvas_content"+i.toString()).getContext('2d');
+      ctx_content.font = '16pt Arial';
+      ctx_content.fillStyle = 'red';
+      ctx_content.fillRect(0, 0, canvas.width, canvas.height);
+      ctx_content.fillStyle = 'white';
+      ctx_content.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
+      ctx_content.fillStyle = 'black';
+      ctx_content.textAlign = "left";
+      ctx_content.textBaseline = "ideographic";
 
-    for ( var i = 0; i < 10; i ++ ) {
+      //  text
+      var kk = 0;
+      for (var j = 0; j < 8; j++) {
+        ctx_content.fillText(text_array[i].toString().substring(kk, kk+12), 20, 40+2.5*kk);
+        kk+=12;
+      }
+      console.log(text_array);
+      // set date canvas
+      var ctx_date = document.getElementById("canvas_date"+i.toString()).getContext('2d');
+      ctx_date.font = '16pt Arial';
+      ctx_date.fillStyle = 'red';
+      ctx_date.fillRect(0, 0, canvas.width, canvas.height);
+      ctx_date.fillStyle = 'white';
+      ctx_date.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
+      ctx_date.fillStyle = 'black';
+      ctx_date.textAlign = "left";
+      ctx_date.textBaseline = "ideographic";
+      ctx_date.fillText(publish_time[i], 20, 40+25);
 
-      var boxMaterial = new THREE.MeshPhongMaterial( { specular: 0xffffff, flatShading: true, vertexColors: true } );
-      boxMaterial.color.setHSL( Math.random() * 0.5 + 0.2, 0.35, Math.random() * 0.45 + 0.25 );
+      // content
+      texture_content = new THREE.Texture(document.getElementById("canvas_content"+i.toString()));
+      texture_content.needsUpdate = true;
 
-      var box = new THREE.Mesh(boxGeometry, materials);
+      // date
+      texture_date = new THREE.Texture(document.getElementById("canvas_date"+i.toString()));
+      texture_date.needsUpdate = true;
 
+      textures.push(texture_content);
+      textures_date.push(texture_date);
+
+      // Boxes
+      var boxGeometry = new THREE.BoxBufferGeometry( 20, 20, 20 );
+      boxGeometry = boxGeometry.toNonIndexed(); // ensure each face has unique vertices
+      boxGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+
+      // ************************************************************************
+      materials.push([
+        new THREE.MeshBasicMaterial({map: textures[i]}),
+        new THREE.MeshBasicMaterial({map:loader.load("/weibo/2297162752/img/20180819 _GvgIRaIFT_6.jpg")}),
+        // the curtail
+        new THREE.MeshBasicMaterial({map: loader.load("/weibo/2297162752/img/20180819 _GvgIRaIFT_6.jpg")}),
+        new THREE.MeshBasicMaterial({map: textures_date[i]}),
+        new THREE.MeshBasicMaterial({map: loader.load(pic_dirs[i])}),
+        new THREE.MeshBasicMaterial({map: loader.load("/weibo/2297162752/img/20180819 _GvgIRaIFT_6.jpg")}),
+      ]);
+      var box = new THREE.Mesh(boxGeometry, materials[i]);
+      // console.log(materials[i]);
       // var box = new THREE.Mesh( boxGeometry, boxMaterial );
       box.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
       box.position.y = Math.floor( Math.random() * 20 ) * 4 + 10;
@@ -273,20 +354,12 @@ function render(){
 
       scene.add( box );
       objects.push( box );
-
     }
-    changeCanvas();
-
-    // canvas.width = canvas.height = 0;
-
-    //
-
-    renderer = new THREE.WebGLRenderer( { antialias: true } );
-    renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( renderer.domElement );
+    console.log(pic_dirs);
 
     window.addEventListener( 'resize', onWindowResize, false );
+
+    animate();
 
   }
 
@@ -303,14 +376,13 @@ function render(){
 
     // objects.position.x += 1;
     requestAnimationFrame( animate );
-    // changeCanvas();
-    texture.needsUpdate = true;
+    // texture_content.needsUpdate = true;
 
     if ( controls.isLocked === true ) {
       // animate boxes
       objects.forEach((obj, i) => {
-        obj.position.x+=0.1;
-        obj.position.z+=0.1;
+        obj.position.x+=0.2;
+        obj.position.z+=0.2;
       });
 
       //
@@ -318,15 +390,12 @@ function render(){
       raycaster.ray.origin.y -= 10;
 
       var intersections = raycaster.intersectObjects( objects );
-
       var onObject = intersections.length > 0;
-
       var time = performance.now();
       var delta = ( time - prevTime ) / 1000;
 
       velocity.x -= velocity.x * 5.0 * delta;
       velocity.z -= velocity.z * 5.0 * delta;
-
       velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
       direction.z = Number( moveForward ) - Number( moveBackward );
@@ -337,50 +406,23 @@ function render(){
       if ( moveLeft || moveRight ) velocity.x -= direction.x * 400.0 * delta;
 
       if ( onObject === true ) {
-
         velocity.y = Math.max( 0, velocity.y );
         canJump = true;
-
       }
 
       controls.moveRight( - velocity.x * delta );
       controls.moveForward( - velocity.z * delta );
-
       controls.getObject().position.y += ( velocity.y * delta ); // new behavior
 
       if ( controls.getObject().position.y < 10 ) {
-
         velocity.y = 0;
         controls.getObject().position.y = 10;
-
         canJump = true;
-
       }
-
       prevTime = time;
 
     }
 
     renderer.render( scene, camera );
 
-  }
-
-  function changeCanvas() {
-      ctx.font = '18pt Arial';
-      ctx.fillStyle = 'red';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'white';
-      ctx.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
-      ctx.fillStyle = 'black';
-      ctx.textAlign = "left";
-      ctx.textBaseline = "ideographic";
-      // ctx.fillText(new Date().getTime(), canvas.width / 2, canvas.height / 2);
-      // console.log(typeof content);
-      let text=["#LV春夏21男装秀", "# @路易威登  玩", "的很开心的一天～ 路", "易威登的微博直播 [", "组图共6张]原图"];
-      // var text = content.split(" ", 3);
-      // console.log(typeof content);
-      // console.log(text.width);
-      ctx.fillText(text[0], 10, 40);
-      ctx.fillText(text[1], 10, 60);
-      ctx.fillText(text[2], 10, 80);
   }
