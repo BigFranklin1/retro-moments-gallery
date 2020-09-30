@@ -1,9 +1,12 @@
 // ******************************************JSON Logic************************************************************
-let pic_urls, pic_dir;
+let pic_urls;
+let pic_dir;
+let pic_dir_single = [];
+let pic_dirs = [];
 let text_array = [];
 let content = [];
-let pic_dirs = [];
 let publish_time = [];
+let materials_row = [];
 let num = 0;
 let today = new Date().getMonth()+1+"-"+new Date().getDate();
 console.log(today);
@@ -22,52 +25,54 @@ async function read(){
           content.push(value.content);
 
           pic_urls = value.original_pictures.split(",");
-          pic_dirs = [];
 
           publish_time.push(value.publish_time);
-          if(pic_urls.length > 1){
-            for(var i = 0; i < pic_urls.length; i++){
-              pic_dir = "/weibo/" + vv.user.id+"/img/"
+
+          pic_dir_single = [];
+          // load picture links
+          console.log(pic_urls);
+          if (pic_urls != "无") {
+            if(pic_urls.length > 1){
+              for(var i = 0; i < pic_urls.length; i++){
+                pic_dir = "weibo/" + vv.user.id+"/img/"
+                + value.publish_time.substring(0,4)
+                + value.publish_time.substring(5,7)
+                + value.publish_time.substring(8,10)
+                + " _" + value.id + "_"+ (i+1) + ".jpg";
+                // pic_dir.replace(/%20/g, " ");
+                pic_dir_single.push(pic_dir);
+              }
+            }else{
+              pic_dir = "weibo/" + vv.user.id+"/img/"
               + value.publish_time.substring(0,4)
               + value.publish_time.substring(5,7)
               + value.publish_time.substring(8,10)
-              + " _" + value.id + "_"+ (i+1) + ".jpg";
-
-              pic_dir.replace(/%20/g, " ");
-              pic_dirs.push(pic_dir);
-              console.log(pic_dir);
+              + " _" + value.id + ".jpg";
+              // pic_dir.replace(/%20/g, " ");
+              pic_dir_single.push(pic_dir);
             }
-          }else {
-            pic_dir = "/weibo/" + vv.user.id+"/img/"
-            + value.publish_time.substring(0,4)
-            + value.publish_time.substring(5,7)
-            + value.publish_time.substring(8,10)
-            + " _" + value.id + ".jpg";
-
-            pic_dir.replace(/%20/g, " ");
-            pic_dirs.push(pic_dir);
           }
+
+
+          pic_dirs.push(pic_dir_single);
+          console.log(pic_dirs);
 
           num++;
         }
       });
 
     });
-    // console.log(text_array);
 
     // change lines
     var incre = 12;
     let line = [];
-
+    console.log(content);
     for (var i = 0; i < content.length; i++){
       line = [];
-
       for (var j = 0; j < content[i].length; j+=incre){
         line.push(content[i].substring(j,j+incre));
-        // console.log(text_array);
       }
       text_array.push(line);
-
     }
     // tweet.push(text_array);
     init();
@@ -109,7 +114,7 @@ async function read(){
 
     console.log(num);
     console.log(publish_time);
-    // console.log(pic_dirs);
+    console.log(pic_dirs);
     // console.log(content);
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
     camera.position.y = 10;
@@ -272,7 +277,7 @@ async function read(){
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
 
-    console.log(pic_dirs[0]);
+    // console.log(pic_dirs[0]);
     for (var i = 0; i < num; i++) {
       canvas = document.createElement('canvas');
       canvas.id = "canvas_content" + i.toString();
@@ -298,13 +303,13 @@ async function read(){
       ctx_content.textAlign = "left";
       ctx_content.textBaseline = "ideographic";
 
-      //  text
+      //  text: j is the number of lines
       var kk = 0;
       for (var j = 0; j < 8; j++) {
         ctx_content.fillText(text_array[i].toString().substring(kk, kk+12), 20, 40+2.5*kk);
         kk+=12;
       }
-      console.log(text_array);
+      // console.log(text_array);
       // set date canvas
       var ctx_date = document.getElementById("canvas_date"+i.toString()).getContext('2d');
       ctx_date.font = '16pt Arial';
@@ -334,15 +339,39 @@ async function read(){
       boxGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
 
       // ************************************************************************
-      materials.push([
-        new THREE.MeshBasicMaterial({map: textures[i]}),
-        new THREE.MeshBasicMaterial({map:loader.load("/weibo/2297162752/img/20180819 _GvgIRaIFT_6.jpg")}),
-        // the curtail
-        new THREE.MeshBasicMaterial({map: loader.load("/weibo/2297162752/img/20180819 _GvgIRaIFT_6.jpg")}),
-        new THREE.MeshBasicMaterial({map: textures_date[i]}),
-        new THREE.MeshBasicMaterial({map: loader.load(pic_dirs[i])}),
-        new THREE.MeshBasicMaterial({map: loader.load("/weibo/2297162752/img/20180819 _GvgIRaIFT_6.jpg")}),
-      ]);
+      materials_row = [];
+      materials_row.push(new THREE.MeshBasicMaterial({map: textures[i]}));
+      var bound;
+      if (pic_dirs[i].length > 5) {
+        bound = 5;
+      }else{
+        bound = pic_dirs[i].length;
+      }
+      for (var k = 0; k < bound; k++) {
+        materials_row.push(new THREE.MeshBasicMaterial({map: loader.load(encodeURIComponent(pic_dirs[i][k].toString()))}));
+      }
+
+      if(pic_dirs[i].length < 5){
+        for (var x = 0; x < 5 - pic_dirs[i].length; x++) {
+          materials_row.push(new THREE.MeshBasicMaterial({map: textures[i]}));
+        }
+      }
+      console.log(materials_row);
+      // materials.push([
+      //   new THREE.MeshBasicMaterial({map: textures[i]}),
+      //
+      //   // for (var k = 0; k < pic_dirs[i].length; k++) {
+      //   //   new THREE.MeshBasicMaterial({map: loader.load(encodeURIComponent(pic_dirs[i][k].toString()))});
+      //   // }
+      //   new THREE.MeshBasicMaterial({map: loader.load(encodeURIComponent(pic_dirs[i].toString()))}),
+      //   // the curtail
+      //   new THREE.MeshBasicMaterial({map: loader.load(encodeURIComponent(pic_dirs[i].toString()))}),
+      //   new THREE.MeshBasicMaterial({map: textures_date[i]}),
+      //   new THREE.MeshBasicMaterial({map: loader.load(encodeURIComponent(pic_dirs[i].toString()))}),
+      //   new THREE.MeshBasicMaterial({map: loader.load(encodeURIComponent(pic_dirs[i].toString()))}),
+      // ]);
+      materials.push(materials_row);
+      console.log(materials);
       var box = new THREE.Mesh(boxGeometry, materials[i]);
       // console.log(materials[i]);
       // var box = new THREE.Mesh( boxGeometry, boxMaterial );
@@ -355,7 +384,7 @@ async function read(){
       scene.add( box );
       objects.push( box );
     }
-    console.log(pic_dirs);
+    // console.log(pic_dirs);
 
     window.addEventListener( 'resize', onWindowResize, false );
 
