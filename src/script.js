@@ -8,7 +8,10 @@ let content = [];
 let publish_time = [];
 let materials_row = [];
 let num = 0;
-let today = new Date().getMonth()+1+"-"+new Date().getDate();
+// let today = new Date().getMonth()+1+"-"+new Date().getDate();
+let today = new Date().toISOString().slice(5, 10)
+
+var dict = {};
 console.log(today);
 read();
 async function read(){
@@ -27,7 +30,6 @@ async function read(){
           pic_urls = value.original_pictures.split(",");
 
           publish_time.push(value.publish_time);
-
           pic_dir_single = [];
           // load picture links
           console.log(pic_urls);
@@ -52,8 +54,6 @@ async function read(){
               pic_dir_single.push(pic_dir);
             }
           }
-
-
           pic_dirs.push(pic_dir_single);
           console.log(pic_dirs);
 
@@ -277,7 +277,8 @@ async function read(){
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
 
-    // console.log(pic_dirs[0]);
+    var ctx_dates_arr = [];
+    console.log(publish_time);
     for (var i = 0; i < num; i++) {
       canvas = document.createElement('canvas');
       canvas.id = "canvas_content" + i.toString();
@@ -322,6 +323,37 @@ async function read(){
       ctx_date.textBaseline = "ideographic";
       ctx_date.fillText(publish_time[i], 20, 40+25);
 
+      console.log(publish_time[i]);
+      console.log(ctx_date);
+
+      if (publish_time[i].substring(5,10) in dict) {
+        console.log(dict[publish_time[i].substring(5,10)]);
+        // for (var values in dict[publish_time[i].substring(5,10)]) {
+        //   // ctx_dates_arr.push(values);
+        //
+        // }
+        ctx_dates_arr = [];
+        for (var b = 0; b < dict[publish_time[i].substring(5,10)].length; b++) {
+          ctx_dates_arr[b] = dict[publish_time[i].substring(5,10)][b];
+        }
+
+        // for (var value in dict[publish_time[i].substring(5,10)]) {
+        //   ctx_dates_arr.push(value);
+        // }
+
+        // ctx_dates_arr.push dict[publish_time[i].substring(5,10)];
+        ctx_dates_arr.push(ctx_date);
+        dict[publish_time[i].substring(5,10)] = ctx_dates_arr;
+        ctx_dates_arr = [];
+      }else{
+        ctx_dates_arr = [];
+        ctx_dates_arr.push(ctx_date);
+        dict[publish_time[i].substring(5,10)] = ctx_dates_arr;
+
+      }
+
+
+
       // content
       texture_content = new THREE.Texture(document.getElementById("canvas_content"+i.toString()));
       texture_content.needsUpdate = true;
@@ -338,25 +370,26 @@ async function read(){
       boxGeometry = boxGeometry.toNonIndexed(); // ensure each face has unique vertices
       boxGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
 
-      // ************************************************************************
+      // *********************************materials***************************************
       materials_row = [];
       materials_row.push(new THREE.MeshBasicMaterial({map: textures[i]}));
+      materials_row.push(new THREE.MeshBasicMaterial({map: textures_date[i]}));
+
       var bound;
-      if (pic_dirs[i].length > 5) {
-        bound = 5;
+      if (pic_dirs[i].length > 4) {
+        bound = 4;
       }else{
         bound = pic_dirs[i].length;
       }
       for (var k = 0; k < bound; k++) {
         materials_row.push(new THREE.MeshBasicMaterial({map: loader.load(encodeURIComponent(pic_dirs[i][k].toString()))}));
       }
-
-      if(pic_dirs[i].length < 5){
-        for (var x = 0; x < 5 - pic_dirs[i].length; x++) {
-          materials_row.push(new THREE.MeshBasicMaterial({map: textures[i]}));
+      if(pic_dirs[i].length < 4){
+        for (var x = 0; x < 4 - pic_dirs[i].length; x++) {
+          materials_row.push(new THREE.MeshBasicMaterial({map: textures_date[i]}));
         }
       }
-      console.log(materials_row);
+      // console.log(materials_row);
       // materials.push([
       //   new THREE.MeshBasicMaterial({map: textures[i]}),
       //
@@ -371,7 +404,8 @@ async function read(){
       //   new THREE.MeshBasicMaterial({map: loader.load(encodeURIComponent(pic_dirs[i].toString()))}),
       // ]);
       materials.push(materials_row);
-      console.log(materials);
+      // console.log(materials);
+      console.log(dict);
       var box = new THREE.Mesh(boxGeometry, materials[i]);
       // console.log(materials[i]);
       // var box = new THREE.Mesh( boxGeometry, boxMaterial );
@@ -410,11 +444,27 @@ async function read(){
     if ( controls.isLocked === true ) {
       // animate boxes
       objects.forEach((obj, i) => {
-        obj.position.x+=0.2;
-        obj.position.z+=0.2;
-      });
+        // console.log(dict);
+        // console.log(today);
+        // console.log(dict["10-04"].canvas.id);
+        console.log(obj);
+        // console.log(obj.material[1].map.image.id);
+        for (var z = 0; z < dict["10-04"].length; z++) {
+          if (obj.material[1].map.image.id == dict["10-04"][z].canvas.id) {
+            console.log("YESYESYES");
+            obj.position.x+=0.2;
+            obj.position.z+=0.2;
+          }
+        }
+        // if (obj.material[1].map.image.id==dict["10-04"].canvas.id) {
+        //   console.log("YESYESYES");
+        //   obj.position.x+=0.2;
+        //   obj.position.z+=0.2;
+        // }
 
-      //
+      });
+      // console.log(today.substring(0,2));
+      console.log(objects);
       raycaster.ray.origin.copy( controls.getObject().position );
       raycaster.ray.origin.y -= 10;
 
