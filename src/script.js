@@ -13,6 +13,8 @@ let today = new Date().toISOString().slice(5, 10)
 
 var dict = {};
 console.log(today);
+//********************************************
+
 read();
 async function read(){
   $.getJSON("test.json", function(json){
@@ -86,7 +88,7 @@ async function read(){
   // import * as THREE from './three.module.js';
   import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 
-  import { PointerLockControls } from '/PointerLockControls.js';
+  import { PointerLockControls } from '/src/PointerLockControls.js';
 
   var camera, scene, renderer, controls, texture_content, texture_date;
   var canvas, canvas_date;
