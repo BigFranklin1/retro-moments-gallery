@@ -14,8 +14,35 @@ let today = new Date().toISOString().slice(5, 10)
 var dict = {};
 console.log(today);
 //********************************************
+// loadManager.onStart = function ( url, itemsLoaded, itemsTotal ) {
+// 	console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+// };
+// loadManager.onLoad = function ( ) {
+// 	console.log( 'Loading complete!');
+// };
+// loadManager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+// 	console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+// };
+// loadManager.onError = function ( url ) {
+// 	console.log( 'There was an error loading ' + url );
+// };
+
+// var loader = new THREE.TextureLoader( manager );
+// loader.load( 'file.obj', function ( object ) {
+
+	//
+
+// } );
+
 
 read();
+// $( document.canvas ).ready(function() {
+//   const preload = document.querySelector(".preload");
+//   preload.classList.add("preload-finish");
+// });
+
+
+
 async function read(){
   $.getJSON("test.json", function(json){
     // v
@@ -114,9 +141,9 @@ async function read(){
   function init() {
 
 
-    console.log(num);
-    console.log(publish_time);
-    console.log(pic_dirs);
+    // console.log(num);
+    // console.log(publish_time);
+    // console.log(pic_dirs);
     // console.log(content);
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
     camera.position.y = 10;
@@ -272,7 +299,7 @@ async function read(){
     //
     // }
     const loadManager = new THREE.LoadingManager();
-    const loader = new THREE.TextureLoader();
+    const loader = new THREE.TextureLoader(loadManager);
     // renderer
     renderer = new THREE.WebGLRenderer( { antialias: true } );
     renderer.setPixelRatio( window.devicePixelRatio );
@@ -419,6 +446,20 @@ async function read(){
 
       scene.add( box );
       objects.push( box );
+      // loader managment
+      loadManager.onStart = function ( url, itemsLoaded, itemsTotal ) {
+      	console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+      };
+      loadManager.onLoad = function ( ) {
+        const preload = document.querySelector(".preload");
+        preload.classList.add("preload-finish");
+      };
+      loadManager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+      	console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+      };
+      loadManager.onError = function ( url ) {
+      	console.log( 'There was an error loading ' + url );
+      };
     }
     // console.log(pic_dirs);
 
@@ -439,16 +480,13 @@ async function read(){
 
   function animate() {
 
-    // objects.position.x += 1;
     requestAnimationFrame( animate );
     // texture_content.needsUpdate = true;
 
     if ( controls.isLocked === true ) {
       // animate boxes
       objects.forEach((obj, i) => {
-        // console.log(dict);
-        // console.log(today);
-        // console.log(dict["10-04"].canvas.id);
+
         console.log(obj);
         // console.log(obj.material[1].map.image.id);
         for (var z = 0; z < dict["10-04"].length; z++) {
@@ -458,11 +496,7 @@ async function read(){
             obj.position.z+=0.2;
           }
         }
-        // if (obj.material[1].map.image.id==dict["10-04"].canvas.id) {
-        //   console.log("YESYESYES");
-        //   obj.position.x+=0.2;
-        //   obj.position.z+=0.2;
-        // }
+
 
       });
       // console.log(today.substring(0,2));
