@@ -7,6 +7,21 @@ body {
 	line-height: 24px;
 	overscroll-behavior: none;
 }
+.init_scene{
+	position: absolute;
+	z-index: 100;
+	width: 100%;
+	height: 100%;
+	background: #000000;
+	transition: opacity 0.5s ease;
+}
+.init_btn{
+	position: absolute;
+	cursor: pointer;
+	top: 50%;
+	left: 50%;
+}
+
 .preload{
 	position: absolute;
 	width: 100%;
@@ -16,7 +31,6 @@ body {
 	z-index: 2;
 	font-size: 30px;
 
-	/* display: flex;	 */
 }
 #loadingAnimation{
 	position: absolute;
@@ -26,6 +40,7 @@ body {
 	font-size: 13px;
 }
 .continue{
+	cursor: pointer;
 	display: none;
 	z-index: 100;
 
@@ -75,7 +90,9 @@ h2{
 	font-size: 30px;
 	cursor: pointer;
 }
-
+#mute_btn{
+	cursor: pointer;
+}
 a {
 	color: #ff0;
 	text-decoration: none;

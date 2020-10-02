@@ -13,9 +13,13 @@ let today = new Date().toISOString().slice(5, 10)
 var dict = {};
 console.log(today);
 //********************************************
+document.querySelector(".init_btn").onclick = function(){
+  document.querySelector(".init_scene").classList.add("preload-finish");
+  read();
 
+}
 
-read();
+// read();
 async function read(){
   $.getJSON("test.json", function(json){
     // v
@@ -120,7 +124,6 @@ async function read(){
     // console.log(content);
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
     camera.position.y = 10;
-
     scene = new THREE.Scene();
     scene.background = new THREE.Color( 0xffffff );
     scene.fog = new THREE.Fog( 0xffffff, 0, 750 );
@@ -248,12 +251,12 @@ async function read(){
     position = floorGeometry.attributes.position;
     var colors = [];
 
-    for ( var i = 0, l = position.count; i < l; i ++ ) {
-
-      color.setHSL( Math.random() * 0.2 + 0.46, 0.25, Math.random() * 0.1 + 0.45 );
-      colors.push( color.r, color.g, color.b );
-
-    }
+    // for ( var i = 0, l = position.count; i < l; i ++ ) {
+    //
+    //   color.setHSL( Math.random() * 0.2 + 0.46, 0.25, Math.random() * 0.1 + 0.45 );
+    //   colors.push( color.r, color.g, color.b );
+    //
+    // }
 
     floorGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
 
@@ -298,7 +301,7 @@ async function read(){
       // set content canvas
       var ctx_content = document.getElementById("canvas_content"+i.toString()).getContext('2d');
       ctx_content.font = '16pt Arial';
-      ctx_content.fillStyle = 'red';
+      ctx_content.fillStyle = 'blue';
       ctx_content.fillRect(0, 0, canvas.width, canvas.height);
       ctx_content.fillStyle = 'white';
       ctx_content.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
@@ -346,7 +349,6 @@ async function read(){
         dict[publish_time[i].substring(5,10)] = ctx_dates_arr;
 
       }
-
 
 
       // content
@@ -442,9 +444,9 @@ async function read(){
               var the_integer = parseInt(the_date, 10);
 
               console.log(the_integer);
-              obj.position.x = Math.floor( the_integer) * 50;
+              obj.position.z = -Math.floor( the_integer) * 50;
               obj.position.y = Math.floor( Math.random() * 10 ) * 4 + 10;
-              obj.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
+              obj.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
               obj.rotation.y = Math.random()*20;
             }
           }
