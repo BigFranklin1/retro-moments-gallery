@@ -1,15 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>ThreeJS Test</title>
+		<title>RetroLive Demo</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<link type="text/css" rel="stylesheet" href="main.css">
 
 	</head>
 	<body>
+
+
 		<div class="preload">
-				<h3>Loading</h3>
+			<div id="loadingAnimation"></div>
+			<div id="preload_text">
+				<p>Loading...</p>
+				<p id="progress"></p>
+				<div class="continue">
+					Continue
+				</div>
+				<div id="mute_btn"> mute </div>
+		  </div>
+		</div>
+
+		<div class="intro">
+			<div class="container">
+				<h2>Project Title</h2>
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+					Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+					Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+					Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+						Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+						Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+						Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+			</div>
+			<div class="start">
+				Start
+			</div>
 		</div>
 
 		<div id="blocker">
@@ -27,11 +54,10 @@
 
 		</div>
 
-
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.0/howler.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-		<script src="https://unpkg.com/three"></script>
-		<script src="https://unpkg.com/@seregpie/three.text-texture"></script>
 		<script type="module" src="src/script.js" charset = "GBK"></script>
-		<script type="text/javascript", src = "src/preloader.js"></script>
+		<!-- <script src="https://unpkg.com/three"></script>
+		<script src="https://unpkg.com/@seregpie/three.text-texture"></script> -->
 	</body>
 </html>

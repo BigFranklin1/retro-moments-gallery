@@ -10,39 +10,12 @@ let materials_row = [];
 let num = 0;
 // let today = new Date().getMonth()+1+"-"+new Date().getDate();
 let today = new Date().toISOString().slice(5, 10)
-
 var dict = {};
 console.log(today);
 //********************************************
-// loadManager.onStart = function ( url, itemsLoaded, itemsTotal ) {
-// 	console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
-// };
-// loadManager.onLoad = function ( ) {
-// 	console.log( 'Loading complete!');
-// };
-// loadManager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
-// 	console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
-// };
-// loadManager.onError = function ( url ) {
-// 	console.log( 'There was an error loading ' + url );
-// };
-
-// var loader = new THREE.TextureLoader( manager );
-// loader.load( 'file.obj', function ( object ) {
-
-	//
-
-// } );
 
 
 read();
-// $( document.canvas ).ready(function() {
-//   const preload = document.querySelector(".preload");
-//   preload.classList.add("preload-finish");
-// });
-
-
-
 async function read(){
   $.getJSON("test.json", function(json){
     // v
@@ -356,25 +329,18 @@ async function read(){
       console.log(ctx_date);
 
       if (publish_time[i].substring(5,10) in dict) {
+
         console.log(dict[publish_time[i].substring(5,10)]);
-        // for (var values in dict[publish_time[i].substring(5,10)]) {
-        //   // ctx_dates_arr.push(values);
-        //
-        // }
         ctx_dates_arr = [];
         for (var b = 0; b < dict[publish_time[i].substring(5,10)].length; b++) {
           ctx_dates_arr[b] = dict[publish_time[i].substring(5,10)][b];
         }
-
-        // for (var value in dict[publish_time[i].substring(5,10)]) {
-        //   ctx_dates_arr.push(value);
-        // }
-
-        // ctx_dates_arr.push dict[publish_time[i].substring(5,10)];
         ctx_dates_arr.push(ctx_date);
         dict[publish_time[i].substring(5,10)] = ctx_dates_arr;
         ctx_dates_arr = [];
+
       }else{
+
         ctx_dates_arr = [];
         ctx_dates_arr.push(ctx_date);
         dict[publish_time[i].substring(5,10)] = ctx_dates_arr;
@@ -418,89 +384,104 @@ async function read(){
           materials_row.push(new THREE.MeshBasicMaterial({map: textures_date[i]}));
         }
       }
-      // console.log(materials_row);
-      // materials.push([
-      //   new THREE.MeshBasicMaterial({map: textures[i]}),
-      //
-      //   // for (var k = 0; k < pic_dirs[i].length; k++) {
-      //   //   new THREE.MeshBasicMaterial({map: loader.load(encodeURIComponent(pic_dirs[i][k].toString()))});
-      //   // }
-      //   new THREE.MeshBasicMaterial({map: loader.load(encodeURIComponent(pic_dirs[i].toString()))}),
-      //   // the curtail
-      //   new THREE.MeshBasicMaterial({map: loader.load(encodeURIComponent(pic_dirs[i].toString()))}),
-      //   new THREE.MeshBasicMaterial({map: textures_date[i]}),
-      //   new THREE.MeshBasicMaterial({map: loader.load(encodeURIComponent(pic_dirs[i].toString()))}),
-      //   new THREE.MeshBasicMaterial({map: loader.load(encodeURIComponent(pic_dirs[i].toString()))}),
-      // ]);
-      materials.push(materials_row);
-      // console.log(materials);
-      console.log(dict);
-      var box = new THREE.Mesh(boxGeometry, materials[i]);
-      // console.log(materials[i]);
-      // var box = new THREE.Mesh( boxGeometry, boxMaterial );
-      box.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
-      box.position.y = Math.floor( Math.random() * 20 ) * 4 + 10;
-      box.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
 
-      box.rotation.y = Math.random()*20;
+      materials.push(materials_row);
+
+      var box = new THREE.Mesh(boxGeometry, materials[i]);
+      console.log(box);
+
 
       scene.add( box );
       objects.push( box );
-      // loader managment
+
+      // loader manager and UI
       loadManager.onStart = function ( url, itemsLoaded, itemsTotal ) {
       	console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
       };
       loadManager.onLoad = function ( ) {
-        const preload = document.querySelector(".preload");
-        preload.classList.add("preload-finish");
+        const continue_btn = document.querySelector(".continue");
+        continue_btn.classList.add("ready");
+        continue_btn.onclick = function(){
+          document.querySelector(".preload").classList.add("preload-finish");
+          document.querySelector(".intro").classList.add("ready");
+        }
       };
       loadManager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
       	console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+        document.getElementById('progress').innerHTML = (100*itemsLoaded/itemsTotal).toFixed(0)+"%";
+        console.log(Math.floor(itemsLoaded*publish_time.length/itemsTotal));
+        var loadingAnimation = document.getElementById('loadingAnimation')
+        loadingAnimation.innerHTML +=  publish_time[Math.floor(itemsLoaded*(publish_time.length-1)/itemsTotal)]+" ";
+        loadingAnimation.style.lineHeight = (innerWidth/itemsTotal)/2.5;
+        console.log(loadingAnimation.style.fontSize.toString().substring(0,2));
       };
       loadManager.onError = function ( url ) {
       	console.log( 'There was an error loading ' + url );
       };
+
+      document.querySelector(".start").onclick = function () {
+        document.querySelector(".start").style.display = "none";
+        document.querySelector(".intro").classList.add("preload-finish");
+      };
+
     }
-    // console.log(pic_dirs);
 
     window.addEventListener( 'resize', onWindowResize, false );
-
+    initBoxPos();
+    loadAudio();
     animate();
-
   }
 
-  function onWindowResize() {
+  function initBoxPos(){
+    for (var key in dict) {
+      objects.forEach((obj, i) => {
+          var date_value = obj.material[1].map.image.id;
+          for (var z = 0; z < dict[key].length; z++){
+            if (date_value == dict[key][z].canvas.id) {
+              var the_date = key.substring(3,5);
+              var the_integer = parseInt(the_date, 10);
 
+              console.log(the_integer);
+              obj.position.x = Math.floor( the_integer) * 50;
+              obj.position.y = Math.floor( Math.random() * 10 ) * 4 + 10;
+              obj.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
+              obj.rotation.y = Math.random()*20;
+            }
+          }
+      });
+    }
+  }
+
+  function loadAudio(){
+    var sound = new Howl({
+      src: ['Beishan.mp3'],
+      autoplay: true,
+      loop: true
+    });
+    sound.play();
+    var muted = false;
+    document.getElementById("mute_btn").onclick = function() {
+      console.log(muted);
+      if (!muted) {
+        sound.mute(true);
+        muted = true;
+      }else {
+        sound.mute(false);
+        muted = false;
+      }
+    };
+  }
+  function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-
     renderer.setSize( window.innerWidth, window.innerHeight );
-
   }
 
   function animate() {
-
     requestAnimationFrame( animate );
     // texture_content.needsUpdate = true;
 
     if ( controls.isLocked === true ) {
-      // animate boxes
-      objects.forEach((obj, i) => {
-
-        console.log(obj);
-        // console.log(obj.material[1].map.image.id);
-        for (var z = 0; z < dict["10-04"].length; z++) {
-          if (obj.material[1].map.image.id == dict["10-04"][z].canvas.id) {
-            console.log("YESYESYES");
-            obj.position.x+=0.2;
-            obj.position.z+=0.2;
-          }
-        }
-
-
-      });
-      // console.log(today.substring(0,2));
-      console.log(objects);
       raycaster.ray.origin.copy( controls.getObject().position );
       raycaster.ray.origin.y -= 10;
 
