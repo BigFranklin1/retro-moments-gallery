@@ -30,11 +30,8 @@ async function read(){
         // (5,7) refers to the month, month starts from 0
         // value
         if (parseInt(value.publish_time.substring(5,7),10) == new Date().getMonth()+1) {
-
           content.push(value.content);
-
           pic_urls = value.original_pictures.split(",");
-
           publish_time.push(value.publish_time);
           pic_dir_single = [];
           // load picture links
@@ -101,6 +98,7 @@ async function read(){
   var textures = [];
   var textures_date = [];
   var raycaster;
+  var cube;
 
   var moveForward = false;
   var moveBackward = false;
@@ -114,14 +112,8 @@ async function read(){
   var vertex = new THREE.Vector3();
   var color = new THREE.Color();
 
-
   function init() {
 
-
-    // console.log(num);
-    // console.log(publish_time);
-    // console.log(pic_dirs);
-    // console.log(content);
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
     camera.position.y = 10;
     scene = new THREE.Scene();
@@ -226,54 +218,16 @@ async function read(){
     raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
 
     // floor
-
     var floorGeometry = new THREE.PlaneBufferGeometry( 2000, 2000, 100, 100 );
     floorGeometry.rotateX( - Math.PI / 2 );
-
     // vertex displacement
 
     var position = floorGeometry.attributes.position;
 
-    // for ( var i = 0, l = position.count; i < l; i ++ ) {
-    //
-    // 	vertex.fromBufferAttribute( position, i );
-    //
-    // 	vertex.x += Math.random() * 5 - 10;
-    // 	vertex.y += Math.random() * 2;
-    // 	vertex.z += Math.random() * 5 - 10;
-    //
-    // 	position.setXYZ( i, vertex.x, vertex.y, vertex.z );
-    //
-    // }
-
-    floorGeometry = floorGeometry.toNonIndexed(); // ensure each face has unique vertices
-
-    position = floorGeometry.attributes.position;
     var colors = [];
 
-    // for ( var i = 0, l = position.count; i < l; i ++ ) {
-    //
-    //   color.setHSL( Math.random() * 0.2 + 0.46, 0.25, Math.random() * 0.1 + 0.45 );
-    //   colors.push( color.r, color.g, color.b );
-    //
-    // }
+    scene.add( new THREE.GridHelper( 2000, 100 ) );
 
-    floorGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
-
-    var floorMaterial = new THREE.MeshBasicMaterial( { vertexColors: true } );
-
-    var floor = new THREE.Mesh( floorGeometry, floorMaterial );
-    scene.add( floor );
-
-    // ************************************************************************
-    // position = boxGeometry.attributes.position;
-    // colors = [];
-    //
-    // for ( var i = 0, l = position.count; i < l; i ++ ) {
-    //   // color.setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
-    //   colors.push( color.r, color.g, color.b );
-    //
-    // }
     const loadManager = new THREE.LoadingManager();
     const loader = new THREE.TextureLoader(loadManager);
     // renderer
@@ -301,7 +255,7 @@ async function read(){
       // set content canvas
       var ctx_content = document.getElementById("canvas_content"+i.toString()).getContext('2d');
       ctx_content.font = '16pt Arial';
-      ctx_content.fillStyle = 'blue';
+      ctx_content.fillStyle = 'black';
       ctx_content.fillRect(0, 0, canvas.width, canvas.height);
       ctx_content.fillStyle = 'white';
       ctx_content.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
@@ -319,7 +273,7 @@ async function read(){
       // set date canvas
       var ctx_date = document.getElementById("canvas_date"+i.toString()).getContext('2d');
       ctx_date.font = '16pt Arial';
-      ctx_date.fillStyle = 'red';
+      ctx_date.fillStyle = 'black';
       ctx_date.fillRect(0, 0, canvas.width, canvas.height);
       ctx_date.fillStyle = 'white';
       ctx_date.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
@@ -349,7 +303,6 @@ async function read(){
         dict[publish_time[i].substring(5,10)] = ctx_dates_arr;
 
       }
-
 
       // content
       texture_content = new THREE.Texture(document.getElementById("canvas_content"+i.toString()));
@@ -390,8 +343,6 @@ async function read(){
       materials.push(materials_row);
 
       var box = new THREE.Mesh(boxGeometry, materials[i]);
-      console.log(box);
-
 
       scene.add( box );
       objects.push( box );
@@ -429,9 +380,104 @@ async function read(){
     }
 
     window.addEventListener( 'resize', onWindowResize, false );
+    addClock();
     initBoxPos();
     loadAudio();
     animate();
+  }
+  var handMinuteParent, handHourParent, handSecondParent;
+  var handMinuteParent_real, handHourParent_real, handSecondParent_real;
+
+  function addClock(){
+    //-------------------------------------------------------------
+    var radius = 5;
+
+    var geometry_ring = new THREE.RingBufferGeometry( radius, radius+0.3, 32 );
+    var material_ring = new THREE.MeshBasicMaterial( { color: 0x000000, side: THREE.DoubleSide } );
+    var mesh_ring = new THREE.Mesh( geometry_ring, material_ring );
+
+
+    var geometry_circle = new THREE.CircleGeometry( radius, 32 );
+
+    const material_circle = new THREE.MeshPhongMaterial({
+      color: 0xcfcfcf,
+      opacity: 0.15,
+      transparent: true,
+    });
+
+    var circle = new THREE.Mesh( geometry_circle, material_circle );
+
+    // minute hand
+    handMinuteParent = new THREE.Object3D();
+    var geometry_box_1 = new THREE.BoxGeometry( radius*0.7, 0.2, 0.1 );
+    var material_box_1 = new THREE.MeshBasicMaterial( {color: 0xeb4034} );
+    var handMinute = new THREE.Mesh( geometry_box_1, material_box_1 );
+    handMinuteParent.add(handMinute);
+    handMinute.translateOnAxis(new THREE.Vector3( 1, 0, 0 ), radius*0.35 );
+
+    // hour hand
+    handHourParent = new THREE.Object3D();
+    var geometry_box_2 = new THREE.BoxGeometry( radius/3, 0.3, 0.1 );
+    var material_box_2 = new THREE.MeshBasicMaterial( {color: 0x000fff} );
+    var handHour = new THREE.Mesh( geometry_box_2, material_box_2 );
+    handHourParent.add(handHour);
+    handHour.translateOnAxis(new THREE.Vector3( 1, 0, 0 ), radius/6 );
+
+    // second hand
+    handSecondParent = new THREE.Object3D();
+    var geometry_box_3 = new THREE.BoxGeometry( radius*0.8, 0.1, 0.1 );
+    var material_box_3 = new THREE.MeshBasicMaterial( {color: 0x00000} );
+    var handSecond = new THREE.Mesh( geometry_box_3, material_box_3 );
+    handSecondParent.add(handSecond);
+    handSecond.translateOnAxis(new THREE.Vector3( 1, 0, 0 ), radius*0.4 );
+
+    var group = new THREE.Group();
+    group.add( circle );
+    group.add( mesh_ring );
+
+    group.add( handMinuteParent );
+    group.add( handHourParent );
+    group.add( handSecondParent );
+
+    scene.add(group);
+    camera.add(group);
+    group.position.set(10,12,-20);
+    group.scale.set(0.4,0.4,1);
+
+    // ----------------------the real time clock-----------------------------
+    var radius = 5;
+    var circle = new THREE.Mesh( geometry_circle, material_circle );
+    // minute hand
+    handMinuteParent_real = new THREE.Object3D();
+
+    var handMinute_real = new THREE.Mesh( geometry_box_1, material_box_1 );
+    handMinuteParent_real.add(handMinute_real);
+    handMinute_real.translateOnAxis(new THREE.Vector3( 1, 0, 0 ), radius*0.4 );
+
+    // hour hand
+    handHourParent_real = new THREE.Object3D();
+    var handHour_real = new THREE.Mesh( geometry_box_2, material_box_2 );
+    handHourParent_real.add(handHour_real);
+    handHour_real.translateOnAxis(new THREE.Vector3( 1, 0, 0 ), radius/6 );
+
+    // second hand
+    handSecondParent_real = new THREE.Object3D();
+    var handSecond_real = new THREE.Mesh( geometry_box_3, material_box_3 );
+    handSecondParent_real.add(handSecond_real);
+    handSecond_real.translateOnAxis(new THREE.Vector3( 1, 0, 0 ), radius/2 );
+
+    var group_real = new THREE.Group();
+    group_real.add( circle );
+    group_real.add( handMinuteParent_real );
+    group_real.add( handHourParent_real );
+    group_real.add( handSecondParent_real );
+
+    scene.add(group_real);
+    camera.add(group_real);
+    group_real.position.set(-10,12,-20);
+    group_real.scale.set(0.4,0.4,1);
+    console.log(group_real);
+    group_real.rotation.z = (Math.PI/2);
   }
 
   function initBoxPos(){
@@ -444,10 +490,10 @@ async function read(){
               var the_integer = parseInt(the_date, 10);
 
               console.log(the_integer);
-              obj.position.z = -Math.floor( the_integer) * 50;
+              obj.position.z = -(30-the_integer) * 50;
               obj.position.y = Math.floor( Math.random() * 10 ) * 4 + 10;
               obj.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
-              obj.rotation.y = Math.random()*20;
+              obj.rotation.y = Math.random() * 20;
             }
           }
       });
@@ -479,11 +525,66 @@ async function read(){
     renderer.setSize( window.innerWidth, window.innerHeight );
   }
 
+  var rotObjectMatrix;
+  function rotateAroundObjectAxis(object, axis, radians) {
+      rotObjectMatrix = new THREE.Matrix4();
+      rotObjectMatrix.makeRotationAxis(axis.normalize(), radians);
+
+      // old code for Three.JS pre r54:
+      // object.matrix.multiplySelf(rotObjectMatrix);      // post-multiply
+      // new code for Three.JS r55+:
+      object.matrix.multiply(rotObjectMatrix);
+
+      // old code for Three.js pre r49:
+      // object.rotation.getRotationFromMatrix(object.matrix, object.scale);
+      // old code for Three.js r50-r58:
+      // object.rotation.setEulerFromRotationMatrix(object.matrix);
+      // new code for Three.js r59+:
+      object.rotation.setFromRotationMatrix(object.matrix);
+  }
+  var rotWorldMatrix;
+  // Rotate an object around an arbitrary axis in world space
+  function rotateAroundWorldAxis(object, axis, radians) {
+      rotWorldMatrix = new THREE.Matrix4();
+      rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
+
+      // old code for Three.JS pre r54:
+      //  rotWorldMatrix.multiply(object.matrix);
+      // new code for Three.JS r55+:
+      rotWorldMatrix.multiply(object.matrix);                // pre-multiply
+
+      object.matrix = rotWorldMatrix;
+
+      // old code for Three.js pre r49:
+      // object.rotation.getRotationFromMatrix(object.matrix, object.scale);
+      // old code for Three.js pre r59:
+      // object.rotation.setEulerFromRotationMatrix(object.matrix);
+      // code for r59+:
+      object.rotation.setFromRotationMatrix(object.matrix);
+  }
   function animate() {
     requestAnimationFrame( animate );
-    // texture_content.needsUpdate = true;
 
     if ( controls.isLocked === true ) {
+      // update clock hands
+      var date = new Date();
+      console.log(date);
+  		var hrs = date.getHours();
+  		var min = date.getMinutes();
+  		var sec = date.getSeconds();
+
+  		var handHourR = (30 * (hrs > 12 ? hrs - 12 : hrs) * Math.PI) / 180;
+  		var handMinuteR = (6 * min * Math.PI) / 180;
+  		var handSecondR = (6 * sec * Math.PI) / 180;
+
+      handSecondParent.rotation.z = -camera.position.z * 0.3;
+      handMinuteParent.rotation.z = -camera.position.z * 0.3/60;
+      handHourParent.rotation.z = -camera.position.z * 0.3/3600;
+
+      handSecondParent_real.rotation.z = -handSecondR;
+      handMinuteParent_real.rotation.z = -handMinuteR;
+      handHourParent_real.rotation.z = -handHourR;
+
       raycaster.ray.origin.copy( controls.getObject().position );
       raycaster.ray.origin.y -= 10;
 
@@ -512,7 +613,7 @@ async function read(){
       controls.moveForward( - velocity.z * delta );
       controls.getObject().position.y += ( velocity.y * delta ); // new behavior
 
-      if ( controls.getObject().position.y < 10 ) {
+        if ( controls.getObject().position.y < 10 ) {
         velocity.y = 0;
         controls.getObject().position.y = 10;
         canJump = true;
