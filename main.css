@@ -52,7 +52,19 @@ body {
 	cursor: pointer;
 	display: none;
 	z-index: 100;
-	padding-bottom: 15px;
+	right: 5%;
+	bottom: 5%;
+	position: absolute;
+}
+.continue2{
+	transition: display 0.5s ease;
+
+	font-size: 30px;
+	cursor: pointer;
+	position: absolute;
+	right: 5%;
+	bottom: 5%;
+	opacity: 100;
 }
 
 #mute_btn{
@@ -62,13 +74,6 @@ body {
 	width: 3%;
 	right: 5%;
 	top:  5%;
-}
-
-.ready{
-	/* cursor: pointer; */
-	display: block;
-	/* opacity: 100; */
-	transition: opacity 0.5s ease;
 	z-index: 100;
 }
 
@@ -76,6 +81,7 @@ body {
 	opacity: 0;
 	pointer-events: none;
 }
+
 #preload_text{
 	position: absolute;
 	text-align: right;
@@ -84,12 +90,13 @@ body {
 	/* margin-left: 50%; */
 	/* align-self: center; */
 }
+
 h2{
 	text-align: center;
 }
+
 .intro{
-	line-height: 2.2;
-	text-align: justify;
+	/* text-align: justify; */
 	position: absolute;
 	width: 100%;
 	height: 100%;
@@ -97,13 +104,42 @@ h2{
 	/* display: none; */
 	transition: opacity 0.5s ease;
 }
+
 .container{
-	margin-top: 5%;
-	margin-left: 25%;
-	margin-right: 25%;
+	/* text-align: center; */
+	left: 30%;
+	top: 20%;
+	position: absolute;
 	font-size: 15px;
+	width: 50%;
+	height: 80%;
+}
+
+.page{
+	/* position: absolute; */
+	line-height: 2.2;
+	z-index: -100;
+	opacity: 0;
+	transition: opacity 0.2s ease;
+
+}
+.page h2{
+	position: absolute;
+
+}
+.page p{
+	position: absolute;
+	top: 10%;
+
+}
+.ready{
+	display: block;
+	opacity: 100;
+	transition: opacity 0.5s ease;
+	z-index: 100;
 }
 .start{
+	display: none;
 	position: absolute;
 	right: 5%;
 	bottom: 5%;
@@ -193,10 +229,12 @@ a, button, input, select {
 
 /* added */
 #blocker {
+	display: none;
 	position: absolute;
 	width: 100%;
 	height: 100%;
 	background-color: rgba(0,0,0,0.5);
+	/* z-index: -100; */
 }
 
 #instructions {

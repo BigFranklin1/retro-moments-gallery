@@ -30,7 +30,7 @@ async function read(){
         // console.log(parseInt(value.publish_time.substring(5,6)));
         // (5,7) refers to the month, month starts from 0
         // value
-        if (parseInt(value.publish_time.substring(5,7),10) == 12) {
+        if (parseInt(value.publish_time.substring(5,7),10) == new Date().getMonth()+1) {
           content.push(value.content);
           pic_urls = value.original_pictures.split(",");
           publish_time.push(value.publish_time);
@@ -172,10 +172,10 @@ async function read(){
           moveRight = true;
           break;
 
-        case 32: // space
-          if ( canJump === true ) velocity.y += 350;
-          canJump = false;
-          break;
+        // case 32: // space
+        //   if ( canJump === true ) velocity.y += 350;
+        //   canJump = false;
+        //   break;
 
       }
 
@@ -384,17 +384,42 @@ async function read(){
         document.getElementById('loading').style.display = "none";
         const continue_btn = document.querySelector(".continue");
         continue_btn.classList.add("ready");
+
+        var pointer = 1;
         continue_btn.onclick = function(){
           document.querySelector(".preload").classList.add("preload-finish");
-          document.querySelector(".intro").classList.add("ready");
+          var p = document.getElementsByClassName("page");
+          p[0].classList.add("ready");
+
+
+        }
+
+        const continue_btn2 = document.querySelector(".continue2");
+
+        continue_btn2.onclick = function(){
+          var p = document.getElementsByClassName("page");
+          console.log(p[pointer]);
+          if (pointer < 3) {
+            p[pointer-1].style.opacity = "0";
+            p[pointer].classList.add("ready");
+            if (pointer==2) {
+              continue_btn2.style.display = "none";
+              document.querySelector(".start").style.display = "block";
+            }
+          }
+
+
+          pointer++;
+
         }
       };
+
       loadManager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
       	console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
         document.getElementById('progress').innerHTML = (100*itemsLoaded/itemsTotal).toFixed(0)+"%";
         console.log(Math.floor(itemsLoaded*publish_time.length/itemsTotal));
         // loadingAnimation.style.display = "block";
-        var loadingAnimation = document.getElementById('loadingAnimation')
+        // var loadingAnimation = document.getElementById('loadingAnimation')
         // loadingAnimation.innerHTML +=  publish_time[Math.floor(itemsLoaded*(publish_time.length-1)/itemsTotal)]+" ";
         // var loadingContext = loadingAnimation.getContext('2d');
         // loadingAnimation.innerHTML = publish_time[Math.floor(itemsLoaded*(publish_time.length-1)/itemsTotal)]+" ";;
@@ -410,6 +435,8 @@ async function read(){
       document.querySelector(".start").onclick = function () {
         document.querySelector(".start").style.display = "none";
         document.querySelector(".intro").classList.add("preload-finish");
+        document.querySelector("#blocker").style.display = "block";
+
       };
 
     }
