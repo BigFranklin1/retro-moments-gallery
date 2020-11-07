@@ -215,11 +215,11 @@ async function read(){
     raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
 
     // floor
-    var floorGeometry = new THREE.PlaneBufferGeometry( 2000, 2000, 100, 100 );
-    floorGeometry.rotateX( - Math.PI / 2 );
+    // var floorGeometry = new THREE.PlaneBufferGeometry( 2000, 2000, 100, 100 );
+    // floorGeometry.rotateX( - Math.PI / 2 );
     // vertex displacement
 
-    var position = floorGeometry.attributes.position;
+    // var position = floorGeometry.attributes.position;
 
     var colors = [];
 
@@ -390,8 +390,6 @@ async function read(){
           document.querySelector(".preload").classList.add("preload-finish");
           var p = document.getElementsByClassName("page");
           p[0].classList.add("ready");
-
-
         }
 
         const continue_btn2 = document.querySelector(".continue2");
@@ -399,10 +397,10 @@ async function read(){
         continue_btn2.onclick = function(){
           var p = document.getElementsByClassName("page");
           console.log(p[pointer]);
-          if (pointer < 3) {
+          if (pointer < 4) {
             p[pointer-1].style.opacity = "0";
             p[pointer].classList.add("ready");
-            if (pointer==2) {
+            if (pointer==3) {
               continue_btn2.style.display = "none";
               document.querySelector(".start").style.display = "block";
             }
@@ -442,6 +440,7 @@ async function read(){
     }
 
     window.addEventListener( 'resize', onWindowResize, false );
+    addWall();
     addClock();
     initBoxPos();
     loadAudio();
@@ -650,6 +649,28 @@ async function read(){
     group_real.scale.set(0.4,0.4,1);
     // console.log(group_real);
     group_real.rotation.z = (Math.PI/2);
+  }
+
+  function addWall(){
+    var cube_height = 600;
+    var cube_length = 4000;
+    const geometry_wall = new THREE.BoxBufferGeometry( 1, cube_height, cube_length );
+    const material_wall = new THREE.MeshBasicMaterial( {color: 0xc9c9c9, clearcoatRoughness:0.6} );
+    const cube = new THREE.Mesh( geometry_wall, material_wall );
+    cube.position.x = 250;
+    cube.position.y = cube_height/2;
+    scene.add( cube );
+
+    var cube_height = 600;
+    var cube_length = 4000;
+    const geometry_wall2 = new THREE.BoxBufferGeometry( 1, cube_height, cube_length );
+    const material_wall2= new THREE.MeshBasicMaterial( {color: 0xc9c9c9, clearcoatRoughness:0.6} );
+    const cube2 = new THREE.Mesh( geometry_wall2, material_wall2 );
+    cube2.position.x = -250;
+    cube2.position.y = cube_height/2;
+    scene.add( cube2 );
+
+
   }
 
   function initBoxPos(){
